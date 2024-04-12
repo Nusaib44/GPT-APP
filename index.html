@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .box {
+            background-color: #2c3e50;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        #codeResult {
+            height: calc(100vh - 170px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Code Generator</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box">
+                    <h4>Enter Your Prompt:</h4>
+                    <form id="codeForm">
+                        <div class="form-group">
+                            <textarea class="form-control" id="prompt" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate Code</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div id="promptResult" class="box" style="display: none;">
+                    <h4>Generated Prompt:</h4>
+                    <p id="generatedPrompt"></p>
+                </div>
+                <div id="codeResult" class="box" style="display: none;">
+                    <h4>Generated Code:</h4>
+                    <code id="generatedCode"></code>
+                </div>
+                <div id="errorAlert" class="alert alert-danger mt-4" role="alert" style="display: none;">
+                    An error occurred while generating code. Please try again.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById('codeForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            var prompt = document.getElementById('prompt').value;
+
+            // Send prompt to backend
+            fetch('/generate-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: prompt }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Display generated prompt and code
+                document.getElementById('generatedPrompt').innerText = prompt;
+                document.getElementById('promptResult').style.display = 'block';
+                document.getElementById('generatedCode').innerText = data.code;
+                document.getElementById('codeResult').style.display = 'block';
+                document.getElementById('errorAlert').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('errorAlert').style.display = 'block';
+                document.getElementById('promptResult').style.display = 'none';
+                document.getElementById('codeResult').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
